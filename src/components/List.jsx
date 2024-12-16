@@ -15,18 +15,24 @@ const useStyles = makeStyles(() => ({
     root: {
         width: '100%',
         backgroundColor: '#f5f5f5',
-        padding: 0
+        padding: 0,
     },
     li: {
-        borderBottom: '1px dashed black'
-    }
+        borderBottom: '1px dashed black',
+    },
 }));
 
-const TodoList = ({ theme, todos, completeTodo, editTodo, deleteTodo, saveTodo, noteRef, preventSubmit }) => {
+const TodoList = ({
+    theme,
+    todos,
+    completeTodo,
+    editTodo,
+    deleteTodo,
+    saveTodo,
+    noteRef,
+}) => {
     const classes = useStyles();
-    const [checked, setChecked] = React.useState([0]);
-    let UniqKey = 123;
-
+    const [checked, setChecked] = React.useState([]);
 
     const handleToggle = (value, inx) => () => {
         const currentIndex = checked.indexOf(value);
@@ -42,17 +48,12 @@ const TodoList = ({ theme, todos, completeTodo, editTodo, deleteTodo, saveTodo, 
         completeTodo(inx);
     };
 
-
     return (
         <ThemeProvider theme={theme}>
             <List className={classes.root}>
-            {todos.map((todo, inx) => {
-                const labelId = `list-todo-${todo}`;
-
-                return (
+                {todos.map((todo, inx) => (
                     <ListItem
-                        key={`todo-${UniqKey++}`}
-                        role={undefined}
+                        key={`todo-${inx}`}
                         dense
                         button
                         className={classes.li}
@@ -61,65 +62,54 @@ const TodoList = ({ theme, todos, completeTodo, editTodo, deleteTodo, saveTodo, 
                             <Checkbox
                                 color="primary"
                                 edge="start"
-                                checked={checked.indexOf(todo) !== -1}
-                                tabIndex={-1}
-                                disableRipple
-                                inputProps={{ 'aria-labelledby': labelId }}
+                                checked={todo.isCompleted}
                                 onClick={handleToggle(todo, inx)}
-                                onKeyPress={preventSubmit}
                             />
                         </ListItemIcon>
-                        {
-                            (!todo.isEditing) ?
-                                <>
-                                    <ListItemText
-                                        id={labelId}
-                                        primary={`${todo.text}`}
-                                        style={{textDecoration: todo.isCompleted ? "line-through" : ""}}
-                                    />
-                                    <ListItemIcon>
-                                        <IconButton
-                                            edge="end"
-                                            aria-label="edit"
-                                            onClick={() => editTodo(inx)}
-                                        >
-                                            <EditIcon/>
-                                        </IconButton>
-                                    </ListItemIcon>
-                                </>
-                                :
-                                <>
-                                    <label
-                                        htmlFor="task" // better accessibility with HTML
-                                        className="visuallyhidden"
-                                    >
-                                        {todo.text}
-                                    </label>
-                                    <input
-                                        className="form__edit-input"
-                                        defaultValue={todo.text}
-                                        ref={(element) => noteRef.current[inx] = element}
-                                        onKeyPress={preventSubmit}
-                                        id="task"
-                                    />
-                                    <ListItemIcon>
-                                        <IconButton onClick={() => saveTodo(inx)} edge="end" aria-label="delete">
-                                            <BookmarkIcon />
-                                        </IconButton>
-                                    </ListItemIcon>
-                                </>
-                        }
+
+                        {!todo.isEditing ? (
+                            <>
+                                <ListItemText
+                                    primary={todo.text}
+                                    style={{
+                                        textDecoration: todo.isCompleted
+                                            ? 'line-through'
+                                            : '',
+                                    }}
+                                />
+                                <ListItemIcon>
+                                    <IconButton onClick={() => editTodo(inx)}>
+                                        <EditIcon />
+                                    </IconButton>
+                                </ListItemIcon>
+                            </>
+                        ) : (
+                            <>
+                                <input
+                                    ref={(el) => (noteRef.current[inx] = el)}
+                                    defaultValue={todo.text}
+                                />
+                                <ListItemIcon>
+                                    <IconButton onClick={() => saveTodo(inx)}>
+                                        <BookmarkIcon />
+                                    </IconButton>
+                                </ListItemIcon>
+                            </>
+                        )}
+
                         <ListItemSecondaryAction>
-                            <IconButton onClick={() => deleteTodo(inx)} edge="end" aria-label="delete">
+                            <IconButton
+                                onClick={() => deleteTodo(inx)}
+                                edge="end"
+                            >
                                 <DeleteIcon />
                             </IconButton>
                         </ListItemSecondaryAction>
                     </ListItem>
-                );
-            })}
-        </List>
+                ))}
+            </List>
         </ThemeProvider>
     );
-}
+};
 
 export default TodoList;
